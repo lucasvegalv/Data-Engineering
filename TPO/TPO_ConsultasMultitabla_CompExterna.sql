@@ -74,10 +74,32 @@ LEFT JOIN gama_producto ON gama_producto.gama = producto.gama
 WHERE pedido.codigo_pedido IS NULL;
 
 -- 10. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama Frutales.
-
-
+SELECT DISTINCT(oficina.codigo_oficina), empleado.nombre AS nombre_empleado, empleado.puesto, cliente.nombre_cliente AS nombre_cliente, producto.gama
+FROM empleado
+JOIN 
+	cliente ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
+JOIN	
+	pedido ON pedido.codigo_cliente = cliente.codigo_cliente
+JOIN 
+	detalle_pedido ON detalle_pedido.codigo_pedido = pedido.codigo_pedido
+JOIN 
+	producto ON producto.codigo_producto = detalle_pedido.codigo_producto
+JOIN
+	oficina ON oficina.codigo_oficina = empleado.codigo_oficina
+WHERE 
+	empleado.puesto = 'Representante Ventas' AND
+	producto.gama = 'Frutales'
 
 -- 11. Devuelve un listado con los clientes que han realizado algún pedido, pero no han realizado ningún pago.
-
+SELECT DISTINCT(cliente.codigo_cliente), cliente.nombre_cliente
+FROM cliente
+JOIN pedido ON pedido.codigo_cliente = cliente.codigo_cliente
+LEFT JOIN pago ON pago.codigo_cliente = pedido.codigo_cliente
+WHERE pago.codigo_cliente IS NULL
 
 -- 12. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el nombre de su jefe asociado.
+SELECT empleado.nombre + ' ' + empleado.apellido1 AS empleado, df_jefe.nombre + ' ' + df_jefe.apellido1 AS jefe
+FROM empleado
+LEFT JOIN cliente ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
+JOIN empleado df_jefe ON df_jefe.codigo_empleado = empleado.codigo_jefe 
+WHERE cliente.codigo_cliente IS NULL
